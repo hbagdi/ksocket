@@ -37,8 +37,6 @@ int tcp_cli(void *arg)
 	set_fs(KERNEL_DS);
 #endif
 
-	//sprintf(current->comm, "ksktcli");	
-
 	memset(&addr_srv, 0, sizeof(addr_srv));
 	addr_srv.sin_family = AF_INET;
 	addr_srv.sin_port = htons(4444);
@@ -58,11 +56,11 @@ int tcp_cli(void *arg)
 		return -1;
 	}
 
-	tmp = inet_ntoa(&addr_srv.sin_addr);
+	tmp = "quit";
 	printk("connected to : %s %d\n", tmp, ntohs(addr_srv.sin_port));
-	kfree(tmp);
 	
 	krecv(sockfd_cli, buf, 1024, 0);
+	ksend(sockfd_cli, tmp, 4, 0);
 	printk("got message : %s\n", buf);
 
 	kclose(sockfd_cli);
@@ -76,8 +74,6 @@ int tcp_cli(void *arg)
 static int ksocket_tcp_cli_init(void)
 {
 	kthread_run(tcp_cli,NULL,"tcp_cli_kthread");
-	//kernel_thread(tcp_cli, NULL, 0);
-	
 	printk("ksocket tcp cli init ok\n");
 	return 0;
 }

@@ -40,12 +40,6 @@ int tcp_srv(void *arg)
 		old_fs = get_fs();
 		set_fs(KERNEL_DS);
 #endif
-
-	//sprintf(current->comm, "ksktsrv"); /* kernel thread name*/
-//	lock_kernel();	 /* This seems to be required for exit_mm */
-//	exit_mm(current);
-//	/* close open files too (stdin/out/err are open) */
-//	exit_files(current);	
 	
 	sockfd_srv = sockfd_cli = NULL;
 	memset(&addr_cli, 0, sizeof(addr_cli));
@@ -114,7 +108,6 @@ int tcp_srv(void *arg)
 
 static int ksocket_tcp_srv_init(void)
 {
-	//kernel_thread(tcp_srv, NULL, 0);
 	kthread_run(tcp_srv, NULL, "tcp_srv_kthread");
 	
 	printk("ksocket tcp srv init ok\n");
