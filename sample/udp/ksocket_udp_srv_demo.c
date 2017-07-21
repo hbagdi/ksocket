@@ -1,5 +1,5 @@
 /* 
- * ksocket project test sample - tcp server
+ * ksocket project test sample - udp server
  * BSD-style socket APIs for kernel 2.6 developers
  * 
  * @2007-2008, China
@@ -30,12 +30,12 @@
 static int port = 4444;
 module_param(port, int, 0444);
 
-int tcp_srv(void *arg)
+int udp_srv(void *arg)
 {
 	ksocket_t sockfd_srv, sockfd_cli;
 	struct sockaddr_in addr_srv;
 	struct sockaddr_in addr_cli;
-	char buf[BUF_SIZE], *tmp;
+	char buf[BUF_SIZE];
 	int addr_len, len;
 
 #ifdef KSOCKET_ADDR_SAFE
@@ -52,7 +52,7 @@ int tcp_srv(void *arg)
 	addr_srv.sin_addr.s_addr = INADDR_ANY;
 	addr_len = sizeof(struct sockaddr_in);
 	
-	sockfd_srv = ksocket(AF_INET, SOCK_STREAM, 0);
+	sockfd_srv = ksocket(AF_INET, SOCK_DGRAM, 0);
 	printk("sockfd_srv = 0x%p\n", sockfd_srv);
 	if (sockfd_srv == NULL)
 	{
@@ -64,43 +64,20 @@ int tcp_srv(void *arg)
 		printk("bind failed\n");
 		return -1;
 	}
-
-	if (klisten(sockfd_srv, 10) < 0)
-	{
-		printk("listen failed\n");
-		return -1;
-	}
-
-	sockfd_cli = kaccept(sockfd_srv, (struct sockaddr *)&addr_cli, &addr_len);
-	if (sockfd_cli == NULL)
-	{
-		printk("accept failed\n");
-		return -1;
-	}
-	else
-		printk("sockfd_cli = 0x%p\n", sockfd_cli);
-	
-	tmp = inet_ntoa(&addr_cli.sin_addr);
-	printk("got connected from : %s %d\n", tmp, ntohs(addr_cli.sin_port));
-	kfree(tmp);
-	
-	len = sprintf(buf, "%s", "Hello, welcome to ksocket tcp srv service\n");
-	ksend(sockfd_cli, buf, len, 0);
 	
 	while (1)
 	{
 		memset(buf, 0, sizeof(buf));
-		len = krecv(sockfd_cli, buf, sizeof(buf), 0);
+		len = krecvfrom(sockfd_srv, buf, sizeof(buf), 0,(struct sockaddr*)&addr_cli,&addr_len);
 		if (len > 0)
 		{
 			printk("got message : %s\n", buf);
-			ksend(sockfd_cli, buf, len, 0);
+			ksendto(sockfd_srv, buf, len, 0,(struct sockaddr*)&addr_cli,addr_len);
 			if (memcmp(buf, "quit", 4) == 0)
 				break;
 		}
 	}
 
-	kclose(sockfd_cli);
 	kclose(sockfd_srv);
 #ifdef KSOCKET_ADDR_SAFE
 		set_fs(old_fs);
@@ -109,20 +86,20 @@ int tcp_srv(void *arg)
 	return 0;
 }
 
-static int ksocket_tcp_srv_init(void)
+static int ksocket_udp_srv_init(void)
 {
-	kthread_run(tcp_srv, NULL, "tcp_srv_kthread");
+	kthread_run(udp_srv, NULL, "tcp_srv_kthread");
 	
-	printk("ksocket tcp srv init ok\n");
+	printk("ksocket udp srv init ok\n");
 	return 0;
 }
 
-static void ksocket_tcp_srv_exit(void)
+static void ksocket_udp_srv_exit(void)
 {
-	printk("ksocket tcp srv exit\n");
+	printk("ksocket udp srv exit\n");
 }
 
-module_init(ksocket_tcp_srv_init);
-module_exit(ksocket_tcp_srv_exit);
+module_init(ksocket_udp_srv_init);
+module_exit(ksocket_udp_srv_exit);
 
 MODULE_LICENSE("Dual BSD/GPL");
