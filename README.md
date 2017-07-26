@@ -2,6 +2,8 @@
 
 BSD-style socket API in kernel space for TCP/IP networking.  
 Original ksocket for v2.6 was published at [http://ksocket.sourceforge.net/](http://ksocket.sourceforge.net/).
+This repository contains changes to make it compatible with new kernel versions.  
+The ksocket API has been updated to incorporate the changes related to the [iov_iter](https://lwn.net/Articles/625077/) interface introduced in kernel v3.19+.
 
 ### Getting started
 ```
