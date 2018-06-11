@@ -139,7 +139,7 @@ ksocket_t kaccept(ksocket_t socket, struct sockaddr *address, int *address_len)
 	new_sk->type = sk->type;
 	new_sk->ops = sk->ops;
 	
-	ret = sk->ops->accept(sk, new_sk, 0 /*sk->file->f_flags*/);
+	ret = sk->ops->accept(sk, new_sk, 0, true);
 	if (ret < 0)
 		goto error_kaccept;
 	
