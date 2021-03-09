@@ -13,6 +13,7 @@
  * Changes for Compatibility with Linux 4.9 to use iov_iter
  * 
  */
+#include <linux/version.h>
 #include <linux/module.h>
 #include <linux/string.h>
 #include <linux/socket.h>
@@ -139,13 +140,21 @@ ksocket_t kaccept(ksocket_t socket, struct sockaddr *address, int *address_len)
 	new_sk->type = sk->type;
 	new_sk->ops = sk->ops;
 	
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
+	ret = sk->ops->accept(sk, new_sk, 0 , true);
+#else
 	ret = sk->ops->accept(sk, new_sk, 0 /*sk->file->f_flags*/);
+#endif
 	if (ret < 0)
 		goto error_kaccept;
 	
 	if (address)
 	{
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
+		ret = new_sk->ops->getname(new_sk, address, 2);
+#else
 		ret = new_sk->ops->getname(new_sk, address, address_len, 2);
+#endif
 		if (ret < 0)
 			goto error_kaccept;
 	}
@@ -197,8 +206,11 @@ ssize_t krecv(ksocket_t socket, void *buffer, size_t length, int flags)
 	old_fs = get_fs();
 	set_fs(KERNEL_DS);
 #endif
-	//hardik
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
 	ret = sock_recvmsg(sk, &msg, flags);
+#else
+	ret = sock_recvmsg(sk, &msg, length, flags);
+#endif
 #ifndef KSOCKET_ADDR_SAFE
 	set_fs(old_fs);
 #endif
@@ -246,8 +258,11 @@ ssize_t ksend(ksocket_t socket, const void *buffer, size_t length, int flags)
 	old_fs = get_fs();
 	set_fs(KERNEL_DS);
 #endif
-	//hardik
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
 	len = sock_sendmsg(sk, &msg);//?
+#else
+	len = sock_sendmsg(sk, &msg, length);//?
+#endif
 #ifndef KSOCKET_ADDR_SAFE
 	set_fs(old_fs);
 #endif
@@ -317,8 +332,11 @@ ssize_t krecvfrom(ksocket_t socket, void * buffer, size_t length,
 	old_fs = get_fs();
 	set_fs(KERNEL_DS);
 #endif
-	//hardik
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
 	len = sock_recvmsg(sk, &msg, flags);
+#else
+	len = sock_recvmsg(sk, &msg, length, flags);
+#endif
 #ifndef KSOCKET_ADDR_SAFE
 	set_fs(old_fs);
 #endif
@@ -370,8 +388,11 @@ ssize_t ksendto(ksocket_t socket, void *message, size_t length,
 	old_fs = get_fs();
 	set_fs(KERNEL_DS);
 #endif
-	//hardik
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
 	len = sock_sendmsg(sk, &msg);//?
+#else
+	len = sock_sendmsg(sk, &msg, length);//?
+#endif
 #ifndef KSOCKET_ADDR_SAFE
 	set_fs(old_fs);
 #endif
@@ -385,7 +406,11 @@ int kgetsockname(ksocket_t socket, struct sockaddr *address, int *address_len)
 	int ret;
 	
 	sk = (struct socket *)socket;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
+	ret = sk->ops->getname(sk, address, 0);
+#else
 	ret = sk->ops->getname(sk, address, address_len, 0);
+#endif
 	
 	return ret;
 }
@@ -396,7 +421,11 @@ int kgetpeername(ksocket_t socket, struct sockaddr *address, int *address_len)
 	int ret;
 	
 	sk = (struct socket *)socket;
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
+	ret = sk->ops->getname(sk, address, 1);
+#else
 	ret = sk->ops->getname(sk, address, address_len, 1);
+#endif
 	
 	return ret;
 }
