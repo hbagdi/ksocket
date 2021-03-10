@@ -25,13 +25,12 @@
 
 #include "ksocket.h"
 
-#define BUF_SIZE 100
 
 int tcp_cli(void *arg)
 {
 	ksocket_t sockfd_cli;
 	struct sockaddr_in addr_srv;
-	char buf[BUF_SIZE], *tmp;
+	char buf[128] = {0}, *tmp;
 	int addr_len;
 
 #ifdef KSOCKET_ADDR_SAFE
