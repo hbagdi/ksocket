@@ -110,13 +110,8 @@ int klisten(ksocket_t socket, int backlog)
 
 int kconnect(ksocket_t socket, struct sockaddr *address, int address_len)
 {
-	struct socket *sk;
-	int ret;
-
-	sk = (struct socket *)socket;
-	ret = sk->ops->connect(sk, address, address_len, 0/*sk->file->f_flags*/);
-	
-	return ret;
+	struct socket *sk = (struct socket *)socket;
+	return kernel_connect(sk, address, address_len, O_RDWR/*sk->file->f_flags*/);
 }
 
 ksocket_t kaccept(ksocket_t socket, struct sockaddr *address, int *address_len)
@@ -141,7 +136,7 @@ ksocket_t kaccept(ksocket_t socket, struct sockaddr *address, int *address_len)
 	new_sk->ops = sk->ops;
 	
 #if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
-	ret = sk->ops->accept(sk, new_sk, 0 , true);
+	ret = kernel_accept(sk, &new_sk, 0);
 #else
 	ret = sk->ops->accept(sk, new_sk, 0 /*sk->file->f_flags*/);
 #endif
