@@ -135,17 +135,17 @@ ksocket_t kaccept(ksocket_t socket, struct sockaddr *address, int *address_len)
 	new_sk->type = sk->type;
 	new_sk->ops = sk->ops;
 	
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 0, 0)
 	ret = kernel_accept(sk, &new_sk, 0);
 #else
-	ret = sk->ops->accept(sk, new_sk, 0 /*sk->file->f_flags*/);
+	ret = sk->ops->accept(sk, new_sk, 0);
 #endif
 	if (ret < 0)
 		goto error_kaccept;
 	
 	if (address)
 	{
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 17, 0)
 		ret = new_sk->ops->getname(new_sk, address, 2);
 #else
 		ret = new_sk->ops->getname(new_sk, address, address_len, 2);
@@ -201,7 +201,7 @@ ssize_t krecv(ksocket_t socket, void *buffer, size_t length, int flags)
 	old_fs = get_fs();
 	set_fs(KERNEL_DS);
 #endif
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 0)
 	ret = sock_recvmsg(sk, &msg, flags);
 #else
 	ret = sock_recvmsg(sk, &msg, length, flags);
@@ -253,10 +253,10 @@ ssize_t ksend(ksocket_t socket, const void *buffer, size_t length, int flags)
 	old_fs = get_fs();
 	set_fs(KERNEL_DS);
 #endif
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
-	len = sock_sendmsg(sk, &msg);//?
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 1, 0)
+	len = sock_sendmsg(sk, &msg);
 #else
-	len = sock_sendmsg(sk, &msg, length);//?
+	len = sock_sendmsg(sk, &msg, length);
 #endif
 #ifndef KSOCKET_ADDR_SAFE
 	set_fs(old_fs);
@@ -327,7 +327,7 @@ ssize_t krecvfrom(ksocket_t socket, void * buffer, size_t length,
 	old_fs = get_fs();
 	set_fs(KERNEL_DS);
 #endif
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(2, 6, 0)
 	len = sock_recvmsg(sk, &msg, flags);
 #else
 	len = sock_recvmsg(sk, &msg, length, flags);
@@ -383,7 +383,7 @@ ssize_t ksendto(ksocket_t socket, void *message, size_t length,
 	old_fs = get_fs();
 	set_fs(KERNEL_DS);
 #endif
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 1, 0)
 	len = sock_sendmsg(sk, &msg);//?
 #else
 	len = sock_sendmsg(sk, &msg, length);//?
@@ -401,10 +401,10 @@ int kgetsockname(ksocket_t socket, struct sockaddr *address, int *address_len)
 	int ret;
 	
 	sk = (struct socket *)socket;
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
-	ret = sk->ops->getname(sk, address, 0);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 17, 0)
+	ret = kernel_getsockname(sk, address);
 #else
-	ret = sk->ops->getname(sk, address, address_len, 0);
+	ret = kernel_getsockname(sk, address, address_len);
 #endif
 	
 	return ret;
@@ -416,10 +416,10 @@ int kgetpeername(ksocket_t socket, struct sockaddr *address, int *address_len)
 	int ret;
 	
 	sk = (struct socket *)socket;
-#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 11, 0)
-	ret = sk->ops->getname(sk, address, 1);
+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4, 17, 0)
+	ret = kernel_getpeername(sk, address);
 #else
-	ret = sk->ops->getname(sk, address, address_len, 1);
+	ret = kernel_getpeername(sk, address, address_len);
 #endif
 	
 	return ret;
