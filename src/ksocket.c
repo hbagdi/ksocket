@@ -1,6 +1,6 @@
 /* 
  * ksocket project
- * BSD-style socket APIs for kernel 2.6 developers
+ * BSD-style socket APIs for kernel 5.0 developers
  * 
  * @2007-2008, China
  * @song.xian-guang@hotmail.com (MSN Accounts)
@@ -28,7 +28,7 @@
 
 #define KSOCKET_NAME	"ksocket"
 #define KSOCKET_VERSION	"0.0.2"
-#define KSOCKET_DESCPT	"BSD-style socket APIs for kernel 2.6 developers"
+#define KSOCKET_DESCPT	"BSD-style socket APIs for kernel 5.0 developers"
 #define KSOCKET_AUTHOR	"msn : song.xian-guang@hotmail.com\n"\
 						"blog: http://sxg.cublog.cn"
 #define KSOCKET_DATE	"2008-05-15"
@@ -111,7 +111,7 @@ int klisten(ksocket_t socket, int backlog)
 int kconnect(ksocket_t socket, struct sockaddr *address, int address_len)
 {
 	struct socket *sk = (struct socket *)socket;
-	return kernel_connect(sk, address, address_len, O_RDWR/*sk->file->f_flags*/);
+	return kernel_connect(sk, address, address_len, 0/*sk->file->f_flags*/);
 }
 
 ksocket_t kaccept(ksocket_t socket, struct sockaddr *address, int *address_len)
