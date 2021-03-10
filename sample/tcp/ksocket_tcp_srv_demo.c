@@ -93,6 +93,7 @@ int tcp_srv(void *arg)
 		len = krecv(sockfd_cli, buf, sizeof(buf), 0);
 		if (len > 0)
 		{
+			buf[strcspn(buf, "\r\n")] = 0;
 			printk("got message : %s\n", buf);
 			ksend(sockfd_cli, buf, len, 0);
 			if (memcmp(buf, "quit", 4) == 0)

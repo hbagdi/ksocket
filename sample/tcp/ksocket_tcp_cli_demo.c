@@ -63,6 +63,7 @@ int tcp_cli(void *arg)
 	
 	krecv(sockfd_cli, buf, 1024, 0);
 	ksend(sockfd_cli, tmp, 4, 0);
+	buf[strcspn(buf, "\r\n")] = 0;
 	printk("got message : %s\n", buf);
 
 	kclose(sockfd_cli);
