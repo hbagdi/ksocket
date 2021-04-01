@@ -25,8 +25,11 @@ ifeq ($(ADDRSAFE),true)
 	EXTRA_CFLAGS += -DKSOCKET_ADDR_SAFE
 endif
 
-default:
+default: symvers
 	$(MAKE) -C $(KDIR) M=$(PWD) modules
+
+symvers:
+	cp ../../src/Module.symvers . || false
 
 clean:
 	rm -rf *.ko *.o *.mod.* .H* .tm* .*cmd Module.symvers modules.order

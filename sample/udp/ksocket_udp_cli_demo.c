@@ -1,6 +1,6 @@
 /* 
  * ksocket project test sample - udp client
- * BSD-style socket APIs for kernel 2.6 developers
+ * BSD-style socket APIs for kernel 5.0 developers
  * 
  * @2007-2008, China
  * @song.xian-guang@hotmail.com (MSN Accounts)

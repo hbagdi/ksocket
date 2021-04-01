@@ -1,6 +1,6 @@
 /* 
  * ksocket project test sample - tcp server
- * BSD-style socket APIs for kernel 2.6 developers
+ * BSD-style socket APIs for kernel 5.0 developers
  * 
  * @2007-2008, China
  * @song.xian-guang@hotmail.com (MSN Accounts)
@@ -93,6 +93,7 @@ int tcp_srv(void *arg)
 		len = krecv(sockfd_cli, buf, sizeof(buf), 0);
 		if (len > 0)
 		{
+			buf[strcspn(buf, "\r\n")] = 0;
 			printk("got message : %s\n", buf);
 			ksend(sockfd_cli, buf, len, 0);
 			if (memcmp(buf, "quit", 4) == 0)

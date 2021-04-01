@@ -1,6 +1,6 @@
 /* 
  * ksocket project test sample - tcp client
- * BSD-style socket APIs for kernel 2.6 developers
+ * BSD-style socket APIs for kernel 5.0 developers
  * 
  * @2007-2008, China
  * @song.xian-guang@hotmail.com (MSN Accounts)
@@ -25,13 +25,12 @@
 
 #include "ksocket.h"
 
-#define BUF_SIZE 100
 
 int tcp_cli(void *arg)
 {
 	ksocket_t sockfd_cli;
 	struct sockaddr_in addr_srv;
-	char buf[BUF_SIZE], *tmp;
+	char buf[128] = {0}, *tmp;
 	int addr_len;
 
 #ifdef KSOCKET_ADDR_SAFE
@@ -64,6 +63,7 @@ int tcp_cli(void *arg)
 	
 	krecv(sockfd_cli, buf, 1024, 0);
 	ksend(sockfd_cli, tmp, 4, 0);
+	buf[strcspn(buf, "\r\n")] = 0;
 	printk("got message : %s\n", buf);
 
 	kclose(sockfd_cli);
